@@ -1,0 +1,14 @@
+# Excluded Packages & Folders
+src/robot_control_system/
+build/
+install/
+log/
+
+# IDE, Caches & Scaffolding
+.vscode/
+*.db
+*.vc.db
+__pycache__/
+*.pyc
+*/resource/
+*/test/

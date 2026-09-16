@@ -21,8 +21,10 @@ class Robot(Node):
         self.action_msg = ArduinoActions()
 
     def reading_callback(self, msg):
-<<<<<<< HEAD
         self.latest_readings=msg
+        
+        self.temperature = msg.temperature 
+        self.gas = msg.gas
 
     def timer_callback(self):
         self.action_msg=ArduinoActions()
@@ -30,18 +32,11 @@ class Robot(Node):
         self.window()
         self.light()
         self.cmd_vel_pub.publish(self.action_msg)
-        
-=======
-        self.temperature = msg.temperature 
-        self.gas = msg.gas
 
-    def timer_callback(self):
-        actions = ArduinoActions()
 
-        actions.fan_speed = self.fan_speed()
-        actions.buzzer = self.buzzer()
-        self.cmd_vel_pub.publish(actions)
->>>>>>> origin/ahmed-control-unit
+        self.action_msg.fan_speed = self.fan_speed()
+        self.action_msg.buzzer = self.buzzer()
+        self.cmd_vel_pub.publish(self.action_msg)
 
     # readings
     def temperature_sensor(self):

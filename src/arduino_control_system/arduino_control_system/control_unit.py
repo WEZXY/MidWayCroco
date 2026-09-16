@@ -11,12 +11,19 @@ class Robot(Node):
         self.arduino_reading_sub = self.create_subscription(ArduinoReading, 'arduino_reading', self.reading_callback, 10)
         self.cmd_vel_pub = self.create_publisher(ArduinoActions, 'arduino_writing', 10)
         self.create_timer(0.1, self.timer_callback)
+        self.latest_readings = ArduinoReading()
+        self.action_msg = ArduinoActions()
 
     def reading_callback(self, msg):
-        pass
+        self.latest_readings=msg
 
     def timer_callback(self):
-        pass
+        self.action_msg=ArduinoActions()
+        self.light_sensor()
+        self.window()
+        self.light()
+        self.cmd_vel_pub.publish(self.action_msg)
+        
 
     # readings
     def temperature_sensor(self):
@@ -29,8 +36,13 @@ class Robot(Node):
         pass
 
     def light_sensor(self):
-        pass
-
+        light_val = self.latest_readings.light
+        if light_val < 50:
+            self.light(1)
+            self.window(False)
+        else:
+            self.light(0)
+            self.windoow(True)
     def pir_sensor(self):
         pass
 
@@ -38,8 +50,8 @@ class Robot(Node):
         pass
 
     # actions
-    def window(self):
-        pass
+    def window(self, state=True):
+        self.action_msg.window = state
 
     def door(self):
         pass
@@ -47,8 +59,8 @@ class Robot(Node):
     def buzzer(self):
         pass
 
-    def light(self):
-        pass
+    def light(self, state=1):
+        self.action_msg.light = state
 
     def fan_speed(self):
         pass

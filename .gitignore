@@ -12,3 +12,4 @@ __pycache__/
 *.pyc
 */resource/
 */test/
+src/gui_task/

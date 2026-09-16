@@ -16,6 +16,16 @@ class Robot(Node):
         pass
 
     def timer_callback(self):
+        msg = ArduinoReading()
+        msg.temperature = 0
+        msg.humidity = 0
+        msg.ir = 0
+        msg.light = 0
+        msg.keypad = 0
+        msg.pir = 0
+        self.cmd_vel_pub.publish(msg)
+
+    def read_serial(self):
         pass
 
 

@@ -16,7 +16,14 @@ class Robot(Node):
         pass
 
     def timer_callback(self):
-        pass
+        msg = ArduinoActions()
+        msg.window = False
+        msg.door = False
+        msg.buzzer = False
+        msg.light = 0
+        msg.fan_speed = 0
+        msg.lcd_message = ''
+        self.cmd_vel_pub.publish(msg)
 
     # readings
     def temperature_sensor(self):

@@ -7,6 +7,12 @@ class Robot(Node):
     def __init__(self):
         super().__init__('Control_Unit')
         self.counter=0.0
+
+        #------temp & gas sensor reading-------#
+        self.temperature = 0
+        self.gas = 0
+        #--------------------------------------#
+
         self.get_logger().info('Starting Control Unit')
         self.arduino_reading_sub = self.create_subscription(ArduinoReading, 'arduino_reading', self.reading_callback, 10)
         self.cmd_vel_pub = self.create_publisher(ArduinoActions, 'arduino_writing', 10)
@@ -15,6 +21,7 @@ class Robot(Node):
         self.action_msg = ArduinoActions()
 
     def reading_callback(self, msg):
+<<<<<<< HEAD
         self.latest_readings=msg
 
     def timer_callback(self):
@@ -24,11 +31,25 @@ class Robot(Node):
         self.light()
         self.cmd_vel_pub.publish(self.action_msg)
         
+=======
+        self.temperature = msg.temperature 
+        self.gas = msg.gas
+
+    def timer_callback(self):
+        actions = ArduinoActions()
+
+        actions.fan_speed = self.fan_speed()
+        actions.buzzer = self.buzzer()
+        self.cmd_vel_pub.publish(actions)
+>>>>>>> origin/ahmed-control-unit
 
     # readings
     def temperature_sensor(self):
-        pass
+        return self.temperature
 
+    def gas_sensor(self):
+        return self.gas
+    
     def humidity_sensor(self):
         pass
 
@@ -57,13 +78,19 @@ class Robot(Node):
         pass
 
     def buzzer(self):
-        pass
+        if self.gas_sensor() > 500 :
+            return True
+        else:
+            return False
 
     def light(self, state=1):
         self.action_msg.light = state
 
     def fan_speed(self):
-        pass
+        if self.temperature_sensor() > 30 :
+            return 255
+        else:
+            return 0
 
     def lcd_message(self):
         pass

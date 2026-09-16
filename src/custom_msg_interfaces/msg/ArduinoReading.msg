@@ -1,6 +1,7 @@
 int8 temperature
-int8 humidity
-int8 ir
-int8 light
-int8 keypad
-int8 pir
+int16 gas
+int16 humidity
+int16 ir
+int16 light
+int16 keypad
+int16 pir

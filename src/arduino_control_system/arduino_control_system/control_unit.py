@@ -8,10 +8,11 @@ class Robot(Node):
         super().__init__('Control_Unit')
         self.counter=0.0
 
-        #------temp & gas sensor reading-------#
         self.temperature = 0
         self.gas = 0
-        #--------------------------------------#
+
+        self.ir_value = None
+        self.ir_alert = False 
 
         self.get_logger().info('Starting Control Unit')
         self.arduino_reading_sub = self.create_subscription(ArduinoReading, 'arduino_reading', self.reading_callback, 10)
@@ -26,12 +27,18 @@ class Robot(Node):
         self.temperature = msg.temperature 
         self.gas = msg.gas
 
+        self.ir_value = msg.ir
+
     def timer_callback(self):
         self.action_msg=ArduinoActions()
         self.light_sensor()
         self.window()
         self.light()
         self.cmd_vel_pub.publish(self.action_msg)
+
+
+        self.ir_sensor()
+        self.action_msg.buzzer = self.buzzer()
 
 
         self.action_msg.fan_speed = self.fan_speed()
@@ -49,7 +56,10 @@ class Robot(Node):
         pass
 
     def ir_sensor(self):
-        pass
+        if self.ir_value is None:
+            return 
+        ir_threshold = 400
+        self.ir_alert = self.ir_value > ir_threshold
 
     def light_sensor(self):
         light_val = self.latest_readings.light
@@ -59,6 +69,7 @@ class Robot(Node):
         else:
             self.light(0)
             self.windoow(True)
+
     def pir_sensor(self):
         pass
 
@@ -73,7 +84,7 @@ class Robot(Node):
         pass
 
     def buzzer(self):
-        if self.gas_sensor() > 500 :
+        if self.gas_sensor() > 500 or self.ir_alert :
             return True
         else:
             return False

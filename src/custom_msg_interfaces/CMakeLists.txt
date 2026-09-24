@@ -13,6 +13,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RobotState.msg"
   "msg/ArduinoReading.msg"
   "msg/ArduinoActions.msg"
+  "msg/GUICommand.msg"
 )
 
 ament_export_dependencies(rosidl_default_runtime)

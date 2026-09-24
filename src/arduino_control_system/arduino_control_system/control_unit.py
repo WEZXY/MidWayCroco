@@ -6,7 +6,7 @@ from custom_msg_interfaces.msg import ArduinoReading, ArduinoActions
 class Robot(Node):
     def __init__(self):
         super().__init__('Control_Unit')
-        self.counter=0.0
+        self.counter = 0.0
 
         self.temperature = 0
         self.gas = 0
@@ -22,7 +22,7 @@ class Robot(Node):
         self.action_msg = ArduinoActions()
 
     def reading_callback(self, msg):
-        self.latest_readings=msg
+        self.latest_readings = msg
         
         self.temperature = msg.temperature 
         self.gas = msg.gas
@@ -30,19 +30,17 @@ class Robot(Node):
         self.ir_value = msg.ir
 
     def timer_callback(self):
-        self.action_msg=ArduinoActions()
-        self.light_sensor()
-        self.window()
-        self.light()
-        self.cmd_vel_pub.publish(self.action_msg)
-
-
+        self.action_msg = ArduinoActions()
+        
+        # 1. Evaluate Sensor Logic First
         self.ir_sensor()
-        self.action_msg.buzzer = self.buzzer()
+        self.light_sensor()
 
-
+        # 2. Assign Fan & Buzzer Output Actions
         self.action_msg.fan_speed = self.fan_speed()
         self.action_msg.buzzer = self.buzzer()
+
+        # 3. Publish Complete Actions ONCE per timer cycle
         self.cmd_vel_pub.publish(self.action_msg)
 
     # readings
@@ -64,11 +62,11 @@ class Robot(Node):
     def light_sensor(self):
         light_val = self.latest_readings.light
         if light_val < 50:
-            self.light(1)
+            self.light(True)
             self.window(False)
         else:
-            self.light(0)
-            self.windoow(True)
+            self.light(False)
+            self.window(True)
 
     def pir_sensor(self):
         pass
@@ -84,16 +82,16 @@ class Robot(Node):
         pass
 
     def buzzer(self):
-        if self.gas_sensor() > 500 or self.ir_alert :
+        if self.gas_sensor() > 500 or self.ir_alert:
             return True
         else:
             return False
 
-    def light(self, state=1):
+    def light(self, state=True):
         self.action_msg.light = state
 
     def fan_speed(self):
-        if self.temperature_sensor() > 30 :
+        if self.temperature_sensor() > 30:
             return 255
         else:
             return 0
@@ -102,14 +100,18 @@ class Robot(Node):
         pass
 
 
-
 def main(args=None):
     rclpy.init(args=args)
 
     robot = Robot()
-    rclpy.spin(robot)
-
-    rclpy.shutdown()
+    
+    try:
+        rclpy.spin(robot)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        robot.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

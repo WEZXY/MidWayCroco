@@ -13,3 +13,4 @@ __pycache__/
 */resource/
 */test/
 src/gui_task/
+src/smart_home_logs.csv

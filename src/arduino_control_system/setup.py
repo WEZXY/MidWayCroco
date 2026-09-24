@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'arduino_serial = arduino_control_system.arduino_serial:main',
             'control_unit = arduino_control_system.control_unit:main',
+            'home_gui = arduino_control_system.home_gui:main',
         ],
     },
 )

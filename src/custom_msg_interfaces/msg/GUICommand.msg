@@ -1,6 +1,5 @@
 bool window
 bool door
-bool buzzer
 bool light
 uint8 fan_speed
 string lcd_message

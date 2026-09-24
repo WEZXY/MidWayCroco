@@ -1,4 +1,4 @@
-int8 temperature
+int16 temperature
 int16 gas
 int16 humidity
 int16 ir

@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Smart Home ROS / Arduino Control Center</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+QMainWindow, QWidget#centralwidget {
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+QTabWidget::pane {
+    border: 1px solid #232323;
+    background-color: #111111;
+}
+QTabBar::tab {
+    background: #111111;
+    color: #7A7A7A;
+    padding: 10px 20px;
+    border: 1px solid #232323;
+    font-weight: bold;
+}
+QTabBar::tab:selected {
+    background: #232323;
+    color: #FFFFFF;
+    border-bottom: 2px solid #696969;
+}
+QFrame.card {
+    background-color: #111111;
+    border: 1px solid #232323;
+    border-radius: 8px;
+}
+QLabel {
+    color: #FFFFFF;
+}
+QLabel.sectionHeader {
+    font-weight: bold;
+    color: #7A7A7A;
+    letter-spacing: 1px;
+}
+QLabel.cardTitle {
+    font-size: 14px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+QLabel.cardSub {
+    font-size: 11px;
+    color: #7A7A7A;
+}
+QLabel.cardValue {
+    font-size: 20px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+QPushButton.toggleBtn {
+    background-color: #111111;
+    color: #7A7A7A;
+    border: 2px solid #343434;
+    border-radius: 6px;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 13px;
+}
+QPushButton.toggleBtn:hover {
+    background-color: #232323;
+    color: #FFFFFF;
+}
+QPushButton.toggleBtn:checked {
+    background-color: #464646;
+    color: #FFFFFF;
+    border: 2px solid #7A7A7A;
+}
+QPushButton.actionBtn {
+    background-color: #343434;
+    color: #FFFFFF;
+    border: 1px solid #464646;
+    border-radius: 6px;
+    padding: 8px 15px;
+    font-weight: bold;
+}
+QPushButton.actionBtn:hover {
+    background-color: #464646;
+}
+QSlider::groove:horizontal {
+    border: 1px solid #343434;
+    height: 8px;
+    background: #111111;
+    border-radius: 4px;
+}
+QSlider::handle:horizontal {
+    background: #7A7A7A;
+    border: 1px solid #FFFFFF;
+    width: 18px;
+    margin: -5px 0;
+    border-radius: 9px;
+}
+QSlider::handle:horizontal:hover {
+    background: #FFFFFF;
+}
+QLineEdit, QDateEdit, QTimeEdit {
+    background-color: #111111;
+    border: 1px solid #343434;
+    color: #FFFFFF;
+    padding: 6px;
+    border-radius: 4px;
+}
+QTableWidget {
+    background-color: #111111;
+    gridline-color: #232323;
+    border: 1px solid #232323;
+    color: #FFFFFF;
+}
+QHeaderView::section {
+    background-color: #232323;
+    color: #FFFFFF;
+    padding: 6px;
+    border: 1px solid #343434;
+    font-weight: bold;
+}
+   </string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+
+      <!-- TAB 1: DASHBOARD -->
+      <widget class="QWidget" name="tabDashboard">
+       <attribute name="title">
+        <string>Control Dashboard</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="dashboardLayout">
+        <property name="spacing">
+         <number>15</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="hdrSensors">
+          <property name="text">
+           <string>LIVE SENSOR READINGS</string>
+          </property>
+          <property name="class" stdset="0">
+           <string>sectionHeader</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridSensors">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+
+          <item row="0" column="0">
+           <widget class="QFrame" name="cardTemp">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout">
+             <item><widget class="QLabel" name="lblT1"><property name="text"><string>Temperature</string></property><property name="class" stdset="0"><string>cardTitle</string></property></widget></item>
+             <item><widget class="QLabel" name="lblS1"><property name="text"><string>Sensor: DHT11</string></property><property name="class" stdset="0"><string>cardSub</string></property></widget></item>
+             <item><widget class="QLabel" name="lblTemp"><property name="text"><string>-- °C</string></property><property name="class" stdset="0"><string>cardValue</string></property></widget></item>
+            </layout>
+           </widget>
+          </item>
+
+          <item row="0" column="1">
+           <widget class="QFrame" name="cardGas">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout">
+             <item><widget class="QLabel" name="lblT2"><property name="text"><string>Gas Sensor</string></property><property name="class" stdset="0"><string>cardTitle</string></property></widget></item>
+             <item><widget class="QLabel" name="lblS2"><property name="text"><string>DataType: int16</string></property><property name="class" stdset="0"><string>cardSub</string></property></widget></item>
+             <item><widget class="QLabel" name="lblGas"><property name="text"><string>-- PPM</string></property><property name="class" stdset="0"><string>cardValue</string></property></widget></item>
+            </layout>
+           </widget>
+          </item>
+
+          <item row="0" column="2">
+           <widget class="QFrame" name="cardHum">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout">
+             <item><widget class="QLabel" name="lblT3"><property name="text"><string>Humidity</string></property><property name="class" stdset="0"><string>cardTitle</string></property></widget></item>
+             <item><widget class="QLabel" name="lblS3"><property name="text"><string>Sensor: DHT11</string></property><property name="class" stdset="0"><string>cardSub</string></property></widget></item>
+             <item><widget class="QLabel" name="lblHumidity"><property name="text"><string>-- %</string></property><property name="class" stdset="0"><string>cardValue</string></property></widget></item>
+            </layout>
+           </widget>
+          </item>
+
+          <item row="0" column="3">
+           <widget class="QFrame" name="cardLight">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout">
+             <item><widget class="QLabel" name="lblT4"><property name="text"><string>Light Intensity</string></property><property name="class" stdset="0"><string>cardTitle</string></property></widget></item>
+             <item><widget class="QLabel" name="lblS4"><property name="text"><string>DataType: int16</string></property><property name="class" stdset="0"><string>cardSub</string></property></widget></item>
+             <item><widget class="QLabel" name="lblLight"><property name="text"><string>-- Lux</string></property><property name="class" stdset="0"><string>cardValue</string></property></widget></item>
+            </layout>
+           </widget>
+          </item>
+
+          <item row="1" column="0">
+           <widget class="QFrame" name="cardIR">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout">
+             <item><widget class="QLabel" name="lblT5"><property name="text"><string>IR Sensor</string></property><property name="class" stdset="0"><string>cardTitle</string></property></widget></item>
+             <item><widget class="QLabel" name="lblS5"><property name="text"><string>DataType: int16</string></property><property name="class" stdset="0"><string>cardSub</string></property></widget></item>
+             <item><widget class="QLabel" name="lblIR"><property name="text"><string>0</string></property><property name="class" stdset="0"><string>cardValue</string></property></widget></item>
+            </layout>
+           </widget>
+          </item>
+
+          <item row="1" column="1">
+           <widget class="QFrame" name="cardPIR">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout">
+             <item><widget class="QLabel" name="lblT6"><property name="text"><string>PIR Motion</string></property><property name="class" stdset="0"><string>cardTitle</string></property></widget></item>
+             <item><widget class="QLabel" name="lblS6"><property name="text"><string>Status: Disabled</string></property><property name="class" stdset="0"><string>cardSub</string></property></widget></item>
+             <item><widget class="QLabel" name="lblPIR"><property name="text"><string>N/A</string></property><property name="class" stdset="0"><string>cardValue</string></property></widget></item>
+            </layout>
+           </widget>
+          </item>
+
+          <item row="1" column="2">
+           <widget class="QFrame" name="cardKeypad">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout">
+             <item><widget class="QLabel" name="lblT7"><property name="text"><string>Keypad Input</string></property><property name="class" stdset="0"><string>cardTitle</string></property></widget></item>
+             <item><widget class="QLabel" name="lblS7"><property name="text"><string>DataType: int16</string></property><property name="class" stdset="0"><string>cardSub</string></property></widget></item>
+             <item><widget class="QLabel" name="lblKeypad"><property name="text"><string>None</string></property><property name="class" stdset="0"><string>cardValue</string></property></widget></item>
+            </layout>
+           </widget>
+          </item>
+
+          <item row="1" column="3">
+           <widget class="QFrame" name="cardBuzzer">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout">
+             <item><widget class="QLabel" name="lblT8"><property name="text"><string>Buzzer Status</string></property><property name="class" stdset="0"><string>cardTitle</string></property></widget></item>
+             <item><widget class="QLabel" name="lblS8"><property name="text"><string>DataType: bool</string></property><property name="class" stdset="0"><string>cardSub</string></property></widget></item>
+             <item><widget class="QLabel" name="lblBuzzer"><property name="text"><string>OFF</string></property><property name="class" stdset="0"><string>cardValue</string></property></widget></item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+
+        <item>
+         <widget class="QLabel" name="hdrActions">
+          <property name="text">
+           <string>ACTUATOR CONTROLS</string>
+          </property>
+          <property name="class" stdset="0">
+           <string>sectionHeader</string>
+          </property>
+         </widget>
+        </item>
+
+        <item>
+         <layout class="QGridLayout" name="gridActions">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="btnWindow">
+            <property name="text"><string>Window (Servo): OFF</string></property>
+            <property name="checkable"><bool>true</bool></property>
+            <property name="class" stdset="0"><string>toggleBtn</string></property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="btnDoor">
+            <property name="text"><string>Door (LED): OFF</string></property>
+            <property name="checkable"><bool>true</bool></property>
+            <property name="class" stdset="0"><string>toggleBtn</string></property>
+           </widget>
+          </item>
+
+          <!-- Fan PWM Control Slider Card -->
+          <item row="1" column="0">
+           <widget class="QFrame" name="cardFanControl">
+            <property name="class" stdset="0"><string>card</string></property>
+            <layout class="QVBoxLayout" name="fanCardLayout">
+             <item>
+              <widget class="QLabel" name="lblFanSpeed">
+               <property name="text"><string>Fan Speed (PWM): 0</string></property>
+               <property name="class" stdset="0"><string>cardTitle</string></property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="sliderFan">
+               <property name="maximum"><number>255</number></property>
+               <property name="orientation"><enum>Qt::Horizontal</enum></property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+
+          <item row="1" column="1">
+           <widget class="QPushButton" name="btnLight">
+            <property name="text"><string>Room Light: OFF</string></property>
+            <property name="checkable"><bool>true</bool></property>
+            <property name="class" stdset="0"><string>toggleBtn</string></property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+
+        <item>
+         <widget class="QFrame" name="frameLCD">
+          <property name="class" stdset="0"><string>card</string></property>
+          <layout class="QHBoxLayout" name="lcdLayout">
+           <item>
+            <widget class="QLabel" name="lblLCD">
+             <property name="styleSheet"><string notr="true">color: #FFFFFF; font-weight: bold;</string></property>
+             <property name="text"><string>LCD I2C Message:</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtLcdMessage">
+             <property name="placeholderText">
+              <string>Enter text to display on I2C LCD screen...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSendLcd">
+             <property name="text"><string>Send to LCD</string></property>
+             <property name="class" stdset="0"><string>actionBtn</string></property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+
+        <item>
+         <spacer name="dashSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- TAB 2: SYSTEM LOGS -->
+      <widget class="QWidget" name="tabLogs">
+       <attribute name="title">
+        <string>System Logs (CSV Data)</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="logsLayout">
+        <item>
+         <widget class="QFrame" name="frameFilter">
+          <property name="class" stdset="0"><string>card</string></property>
+          <layout class="QHBoxLayout" name="filterLayout">
+           <item>
+            <widget class="QLabel" name="lblDate">
+             <property name="styleSheet"><string notr="true">color: #FFFFFF; font-weight: bold;</string></property>
+             <property name="text"><string>Date:</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateEdit" name="datePicker">
+             <property name="calendarPopup"><bool>true</bool></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblTime">
+             <property name="styleSheet"><string notr="true">color: #FFFFFF; font-weight: bold;</string></property>
+             <property name="text"><string>Start Time:</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTimeEdit" name="timePicker"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnFilterLogs">
+             <property name="text"><string>Filter 1-Hour Window</string></property>
+             <property name="class" stdset="0"><string>actionBtn</string></property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnLoadLastHour">
+             <property name="text"><string>Load Last 1 Hour</string></property>
+             <property name="class" stdset="0"><string>actionBtn</string></property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+
+        <item>
+         <widget class="QTableWidget" name="tableLogs">
+          <property name="columnCount"><number>16</number></property>
+          <column><property name="text"><string>Date</string></property></column>
+          <column><property name="text"><string>Time</string></property></column>
+          <column><property name="text"><string>Temp</string></property></column>
+          <column><property name="text"><string>Gas</string></property></column>
+          <column><property name="text"><string>Humidity</string></property></column>
+          <column><property name="text"><string>Light</string></property></column>
+          <column><property name="text"><string>IR</string></property></column>
+          <column><property name="text"><string>PIR</string></property></column>
+          <column><property name="text"><string>Keypad</string></property></column>
+          <column><property name="text"><string>Buzzer</string></property></column>
+          <column><property name="text"><string>Window</string></property></column>
+          <column><property name="text"><string>Door</string></property></column>
+          <column><property name="text"><string>Fan</string></property></column>
+          <column><property name="text"><string>RoomLight</string></property></column>
+          <column><property name="text"><string>LCD Message</string></property></column>
+          <column><property name="text"><string>Code</string></property></column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

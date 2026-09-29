@@ -1,117 +1,135 @@
-#!/home/elmoslimany/ros2_ws/src/.venv/bin/python
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from custom_msg_interfaces.msg import ArduinoReading, ArduinoActions
+import csv
+import os
+from datetime import datetime
+from custom_msg_interfaces.msg import ArduinoReading, ArduinoActions, GUICommand
 
-class Robot(Node):
+
+class ControlUnitNode(Node):
+
     def __init__(self):
-        super().__init__('Control_Unit')
-        self.counter = 0.0
+        super().__init__('control_unit')
+        self.get_logger().info('Starting Control Unit with Data Logger')
 
-        self.temperature = 0
-        self.gas = 0
+        self.log_file = "smart_home_logs.csv"
+        self.init_csv_file()
 
-        self.ir_value = None
-        self.ir_alert = False 
-
-        self.get_logger().info('Starting Control Unit')
-        self.arduino_reading_sub = self.create_subscription(ArduinoReading, 'arduino_reading', self.reading_callback, 10)
-        self.cmd_vel_pub = self.create_publisher(ArduinoActions, 'arduino_writing', 10)
-        self.create_timer(0.1, self.timer_callback)
+        # State Variables
         self.latest_readings = ArduinoReading()
-        self.action_msg = ArduinoActions()
+        self.gui_cmd = GUICommand()
+        self.has_gui_cmd = False
+
+        self.reading_sub = self.create_subscription(
+            ArduinoReading, 'arduino_reading', self.reading_callback, 10
+        )
+        self.gui_sub = self.create_subscription(
+            GUICommand, 'gui_command', self.gui_callback, 10
+        )
+        self.actions_pub = self.create_publisher(
+            ArduinoActions, 'arduino_writing', 10
+        )
+
+        self.create_timer(0.01, self.timer_callback)
+        self.create_timer(1.0, self.log_to_csv_callback)  # Log to CSV at 1 Hz
+
+    def init_csv_file(self):
+        if not os.path.exists(self.log_file):
+            with open(self.log_file, mode="w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    "Date", "Time", "Temp", "Gas", "Humidity", "Light",
+                    "IR", "PIR", "Keypad", "Buzzer", "Window", "Door",
+                    "Fan", "RoomLight", "LCD Message", "Code"
+                ])
 
     def reading_callback(self, msg):
         self.latest_readings = msg
-        
-        self.temperature = msg.temperature 
-        self.gas = msg.gas
 
-        self.ir_value = msg.ir
+    def gui_callback(self, msg):
+        self.gui_cmd = msg
+        self.has_gui_cmd = True
 
     def timer_callback(self):
-        self.action_msg = ArduinoActions()
-        
-        # 1. Evaluate Sensor Logic First
-        self.ir_sensor()
-        self.light_sensor()
+        action = ArduinoActions()
 
-        # 2. Assign Fan & Buzzer Output Actions
-        self.action_msg.fan_speed = self.fan_speed()
-        self.action_msg.buzzer = self.buzzer()
+        # 1. Automatic Sensor Safety Logic
+        gas_alert = self.latest_readings.gas > 500
+        ir_alert = self.latest_readings.ir > 400
+        auto_buzzer = gas_alert or ir_alert
 
-        # 3. Publish Complete Actions ONCE per timer cycle
-        self.cmd_vel_pub.publish(self.action_msg)
+        auto_light = self.latest_readings.light > 400
+        auto_window = not auto_light
+        auto_fan = 255 if self.latest_readings.temperature > 30 else 0
 
-    # readings
-    def temperature_sensor(self):
-        return self.temperature
-
-    def gas_sensor(self):
-        return self.gas
-    
-    def humidity_sensor(self):
-        pass
-
-    def ir_sensor(self):
-        if self.ir_value is None:
-            return 
-        ir_threshold = 400
-        self.ir_alert = self.ir_value > ir_threshold
-
-    def light_sensor(self):
-        light_val = self.latest_readings.light
-        if light_val < 50:
-            self.light(True)
-            self.window(False)
+        # 2. Merge Auto Logic with GUI Manual Overrides
+        if self.has_gui_cmd:
+            action.window = self.gui_cmd.window
+            action.door = self.gui_cmd.door
+            action.light = self.gui_cmd.light
+            action.fan_speed = self.gui_cmd.fan_speed
+            action.lcd_message = self.gui_cmd.lcd_message
         else:
-            self.light(False)
-            self.window(True)
+            action.window = auto_window
+            action.door = False
+            action.light = auto_light
+            action.fan_speed = auto_fan
+            action.lcd_message = "System OK"
 
-    def pir_sensor(self):
-        pass
+        action.buzzer = auto_buzzer or (self.gui_cmd.buzzer if hasattr(self.gui_cmd, 'buzzer') else False)
+        self.current_action = action
+        self.actions_pub.publish(action)
 
-    def keypad(self):
-        pass
+    def log_to_csv_callback(self):
+        if not hasattr(self, 'current_action'):
+            return
 
-    # actions
-    def window(self, state=True):
-        self.action_msg.window = state
+        now = datetime.now()
+        date_str = now.strftime("%Y-%m-%d")
+        time_str = now.strftime("%H:%M:%S")
 
-    def door(self):
-        pass
+        code = "OK"
+        if self.latest_readings.gas > 500:
+            code = "GAS_ALERT"
+        elif self.latest_readings.ir > 400:
+            code = "IR_ALERT"
 
-    def buzzer(self):
-        if self.gas_sensor() > 500 or self.ir_alert:
-            return True
-        else:
-            return False
+        row = [
+            date_str,
+            time_str,
+            self.latest_readings.temperature,
+            self.latest_readings.gas,
+            self.latest_readings.humidity,
+            self.latest_readings.light,
+            self.latest_readings.ir,
+            self.latest_readings.pir,
+            self.latest_readings.keypad,
+            1 if self.current_action.buzzer else 0,
+            1 if self.current_action.window else 0,
+            1 if self.current_action.door else 0,
+            self.current_action.fan_speed,
+            1 if self.current_action.light else 0,
+            self.current_action.lcd_message,
+            code
+        ]
 
-    def light(self, state=True):
-        self.action_msg.light = state
-
-    def fan_speed(self):
-        if self.temperature_sensor() > 30:
-            return 255
-        else:
-            return 0
-
-    def lcd_message(self):
-        pass
+        with open(self.log_file, mode="a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
 
 
 def main(args=None):
     rclpy.init(args=args)
-
-    robot = Robot()
-    
+    node = ControlUnitNode()
     try:
-        rclpy.spin(robot)
+        rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     finally:
-        robot.destroy_node()
+        node.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

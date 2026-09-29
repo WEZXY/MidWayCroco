@@ -10,6 +10,12 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+
+        ('share/' + package_name,
+         ['smart_home_system.ui']),
+
+        ('share/' + package_name,
+         ['smart_home_logs.csv']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

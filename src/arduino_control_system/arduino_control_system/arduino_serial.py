@@ -1,19 +1,16 @@
-#!/home/elmoslimany/ros2_ws/src/.venv/bin/python
-
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 from custom_msg_interfaces.msg import ArduinoReading, ArduinoActions
 import serial
 
 
-class Robot(Node):
+class ArduinoSerialNode(Node):
 
     def __init__(self):
-        super().__init__('Arduino_Serial')
+        super().__init__('arduino_serial')
+        self.get_logger().info('Starting Arduino Serial Node')
 
-        self.get_logger().info('Starting Arduino Serial (Standard ASCII Protocol)')
-
-        # Arduino Serial connection
         self.arduino = serial.Serial('/dev/ttyACM0', 9600, timeout=0.1)
 
         self.reading_pub = self.create_publisher(
@@ -32,16 +29,20 @@ class Robot(Node):
         self.create_timer(0.05, self.timer_callback)
 
     def writing_callback(self, msg):
-        """Sends clean CSV line: window,door,buzzer,light,fan_speed\n"""
-        cmd_str = f"{int(msg.window)},{int(msg.door)},{int(msg.buzzer)},{int(msg.light)},{int(msg.fan_speed)}\n"
-        self.arduino.write(cmd_str.encode('ascii'))
+        """Sends CSV line: window,door,buzzer,light,fan_speed,lcd_message\n"""
+        cmd_str = f"{int(msg.window)},{int(msg.door)},{int(msg.buzzer)},{int(msg.light)},{int(msg.fan_speed)},{msg.lcd_message}\n"
+        self.arduino.write(cmd_str.encode('ascii', errors='ignore'))
 
     def timer_callback(self):
-        """Reads plain CSV lines safely without extra decoding libraries."""
-        if self.arduino.in_waiting > 0:
+        print("timer callback")
+        if True:
+            print("in_waiting")
+            print(self.arduino.readline().decode('ascii', errors='ignore').strip())
             try:
+                print("reading")
                 line = self.arduino.readline().decode('ascii', errors='ignore').strip()
                 if not line:
+                    print("none")
                     return
 
                 data = line.split(',')
@@ -58,14 +59,14 @@ class Robot(Node):
                     self.reading_pub.publish(msg)
 
             except (ValueError, IndexError):
-                pass
+                print("error")
 
 
 def main(args=None):
     rclpy.init(args=args)
-    robot = Robot()
-    rclpy.spin(robot)
-    robot.destroy_node()
+    node = ArduinoSerialNode()
+    rclpy.spin(node)
+    node.destroy_node()
     rclpy.shutdown()
 
 
